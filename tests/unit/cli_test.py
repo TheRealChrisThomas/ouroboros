@@ -1,4 +1,4 @@
-from os import environ
+import os
 import pytest
 import ouroboros.cli as cli
 import ouroboros.defaults as defaults
@@ -28,11 +28,12 @@ def test_url_args(mocker, url_args, url_result):
 
 @pytest.mark.parametrize('interval_env, interval_env_result', [
     ({'INTERVAL': 't'}, False),
-    ({'INTERVAL': '10'}, 10),
+    ({'INTERVAL': '10'}, 10)
 ])
 def test_get_int_env_var(mocker, interval_env, interval_env_result):
     mocker.patch.dict('os.environ', interval_env)
-    assert cli.get_int_env_var(environ.get('INTERNAL')) == interval_env_result
+    assert cli.get_int_env_var(env_var=os.environ.get(
+        'INTERVAL')) == interval_env_result
 
 
 def test_interval_arg_invalid_value(mocker):

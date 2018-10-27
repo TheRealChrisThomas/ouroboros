@@ -39,10 +39,12 @@ def checkURI(uri):
 
 
 def get_int_env_var(env_var):
-    """Attempt to convert INTERVAL environment variable to int"""
+    """Attempt to convert environment variable to int"""
     try:
+        print(env_var)
         return int(env_var)
-    except (ValueError, TypeError):
+    except (ValueError, TypeError) as e:
+        print(e)
         return False
 
 
@@ -73,10 +75,9 @@ def parse(sysargs):
 
     parser.add_argument('--metrics', type=int, default=get_int_env_var(env_var=environ.get('METRICS')) or defaults.METRICS_PORT, dest="metrics",
                         help='Enable prometheus endpoint')
+    args = parser.parse_args(sysargs)
 
-   args = parser.parse_args(sysargs)
-
-   if not args.url:
+    if not args.url:
         args.url = defaults.LOCAL_UNIX_SOCKET
     else:
         if args.url is not defaults.LOCAL_UNIX_SOCKET:
