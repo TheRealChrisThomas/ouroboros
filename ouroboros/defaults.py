@@ -4,3 +4,4 @@ MONITOR = []
 LOGLEVEL = 'info'
 RUNONCE = False
 CLEANUP = False
+METRICS_PORT = 8000

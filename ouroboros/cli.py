@@ -9,7 +9,7 @@ api_client = None
 
 def checkURI(uri):
     """Validate tcp:// regex"""
-    regex = re.compile( r"""(?xi) # "verbose" mode & case-insensitive
+    regex = re.compile(r"""(?xi) # "verbose" mode & case-insensitive
         \A                        # in the beginning...
         tcps?://                  # tcp or tcps protocol
         (?:                       # hostname / IP address
@@ -38,11 +38,10 @@ def checkURI(uri):
     return re.match(regex, uri)
 
 
-def get_interval_env():
+def get_int_env_var(env_var):
     """Attempt to convert INTERVAL environment variable to int"""
-    int_env = environ.get('INTERVAL')
     try:
-        return int(int_env)
+        return int(env_var)
     except (ValueError, TypeError):
         return False
 
@@ -56,7 +55,7 @@ def parse(sysargs):
     parser.add_argument('-u', '--url', default=defaults.LOCAL_UNIX_SOCKET,
                         help='Url for tcp host (defaults to "unix://var/run/docker.sock")')
 
-    parser.add_argument('-i', '--interval', type=int, default=get_interval_env() or defaults.INTERVAL, dest="interval",
+    parser.add_argument('-i', '--interval', type=int, default=get_int_env_var(env_var=environ.get('INTERVAL')) or defaults.INTERVAL, dest="interval",
                         help='Interval in seconds between checking for updates (defaults to 300s)')
 
     parser.add_argument('-m', '--monitor', nargs='+', default=environ.get('MONITOR') or [], dest="monitor",
@@ -71,13 +70,18 @@ def parse(sysargs):
 
     parser.add_argument('-c', '--cleanup', default=environ.get('CLEANUP') or False, dest="cleanup",
                         help='Remove old images after updating', action='store_true')
-    args = parser.parse_args(sysargs)
 
-    if not args.url:
+    parser.add_argument('--metrics', type=int, default=get_int_env_var(env_var=environ.get('METRICS')) or defaults.METRICS_PORT, dest="metrics",
+                        help='Enable prometheus endpoint')
+
+   args = parser.parse_args(sysargs)
+
+   if not args.url:
         args.url = defaults.LOCAL_UNIX_SOCKET
     else:
         if args.url is not defaults.LOCAL_UNIX_SOCKET:
-            args.url = args.url if checkURI(args.url) else defaults.LOCAL_UNIX_SOCKET
+            args.url = args.url if checkURI(
+                args.url) else defaults.LOCAL_UNIX_SOCKET
 
     api_client = docker.APIClient(base_url=args.url)
     return args
